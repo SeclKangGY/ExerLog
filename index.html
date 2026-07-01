@@ -306,6 +306,18 @@ input[type=date]:focus, .sel:focus { border-color: var(--accent); }
     <div class="auth-switch">
       처음이신가요? <a onclick="showOverlay('register')">회원가입</a>
     </div>
+
+    <!-- API URL 설정 (접기/펼치기) -->
+    <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px">
+      <div onclick="toggleApiBox()" style="font-size:12px;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:6px">
+        <span id="apiArrow">▶</span> API URL 설정
+        <span id="apiSetBadge" style="display:none;background:var(--green);color:#000;border-radius:10px;padding:1px 8px;font-size:10px;font-weight:600">설정됨</span>
+      </div>
+      <div id="apiBox" style="display:none;margin-top:10px">
+        <input class="auth-input" id="apiUrlLogin" placeholder="https://script.google.com/macros/s/.../exec" style="margin-bottom:8px;font-size:12px">
+        <button class="btn-primary" onclick="saveApiUrlLogin()" style="font-size:13px;padding:9px">저장</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -592,7 +604,12 @@ function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 window.onload = function() {
   // restore API url
   const saved = localStorage.getItem('exerlog_api');
-  if (saved) { API_URL = saved; document.getElementById('apiUrlInput').value = saved; }
+  if (saved) {
+    API_URL = saved;
+    const inp = document.getElementById("apiUrlInput"); if(inp) inp.value = saved;
+    const inp2 = document.getElementById("apiUrlLogin"); if(inp2) inp2.value = saved;
+    const badge = document.getElementById("apiSetBadge"); if(badge) badge.style.display = "inline";
+  }
 
   // auto-login from session storage
   const s = sessionStorage.getItem('exerlog_session');
@@ -1002,6 +1019,27 @@ function saveApiUrl() {
   API_URL = url;
   localStorage.setItem('exerlog_api', url);
   showToast('✅ API URL이 저장되었습니다');
+}
+
+function toggleApiBox() {
+  const box = document.getElementById('apiBox');
+  const arrow = document.getElementById('apiArrow');
+  const open = box.style.display === 'none';
+  box.style.display = open ? 'block' : 'none';
+  arrow.textContent = open ? '▼' : '▶';
+}
+
+function saveApiUrlLogin() {
+  const url = document.getElementById('apiUrlLogin').value.trim();
+  if (!url) { showToast('URL을 입력하세요', true); return; }
+  API_URL = url;
+  localStorage.setItem('exerlog_api', url);
+  const inp = document.getElementById('apiUrlInput');
+  if (inp) inp.value = url;
+  document.getElementById('apiSetBadge').style.display = 'inline';
+  document.getElementById('apiBox').style.display = 'none';
+  document.getElementById('apiArrow').textContent = '▶';
+  showToast('✅ API URL 저장 완료! 이제 로그인하세요');
 }
 
 // ═══════════════════════════════════════════════
