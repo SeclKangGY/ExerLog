@@ -717,9 +717,18 @@ async function afterLogin() {
   // load records FIRST, then setToday so prefill works correctly
   try {
     const r = await api({ action:'getRecords', username:session.username });
-    if (r.ok) allRecords = r.records || [];
-  } catch(e) { showToast('기록 불러오기 실패: '+e.message, true); }
+    console.log('getRecords response:', JSON.stringify(r));
+    if (r.ok) {
+      allRecords = r.records || [];
+      console.log('allRecords loaded:', allRecords.length, 'records');
+      if (allRecords.length > 0) console.log('first record:', JSON.stringify(allRecords[0]));
+    }
+  } catch(e) {
+    console.error('기록 불러오기 실패:', e.message);
+    showToast('기록 불러오기 실패: '+e.message, true);
+  }
 
+  console.log('calling setToday, allRecords.length=', allRecords.length);
   setToday(); // called after records loaded
 }
 
