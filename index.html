@@ -380,8 +380,6 @@ input[type=date]:focus, .sel:focus { border-color: var(--accent); }
   <button onclick="showTab('settings',this)">⚙️ 설정</button>
 </nav>
 
-<!-- 디버그 박스 -->
-<div id="debugBox" style="display:none;position:fixed;top:70px;left:10px;right:10px;background:#1a2a1a;border:2px solid #38d9a9;border-radius:10px;padding:14px;font-size:13px;color:#38d9a9;z-index:999;line-height:1.8">디버그 로딩중...</div>
 
 <main>
 
@@ -727,13 +725,8 @@ async function afterLogin() {
         date: String(rec.date).slice(0,10)
       }));
     }
-    // 디버그
-    const rec0 = allRecords[0];
-    const dbgMsg = `records:${allRecords.length}건 / ` +
-      (rec0 ? `날짜:[${rec0.date}] 오늘:[${todayStr()}] 일치:${rec0.date===todayStr()}` : '데이터없음');
-    showToast(dbgMsg);
   } catch(e) {
-    showToast('API오류:'+e.message, true);
+    showToast('기록 불러오기 실패: '+e.message, true);
   }
 
   setToday();
@@ -1105,7 +1098,7 @@ function showToast(msg, isErr=false) {
   t.textContent=msg; t.className='toast'+(isErr?' err':'');
   t.classList.add('show');
   clearTimeout(toastT);
-  toastT=setTimeout(()=>t.classList.remove('show'),10000);
+  toastT=setTimeout(()=>t.classList.remove('show'),2800);
 }
 </script>
 </body>
