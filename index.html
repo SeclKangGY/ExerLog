@@ -721,7 +721,11 @@ async function afterLogin() {
   try {
     const r = await api({ action:'getRecords', username:session.username });
       if (r.ok) {
-      allRecords = r.records || [];
+      // normalize all dates to YYYY-MM-DD string
+      allRecords = (r.records || []).map(rec => ({
+        ...rec,
+        date: String(rec.date).slice(0,10)
+      }));
     }
     // 디버그
     const rec0 = allRecords[0];
@@ -800,7 +804,7 @@ function loadDay() {
   const d = document.getElementById('recordDate').value;
   EX.forEach(ex => clearEx(ex));
   document.getElementById('weightInput').value='';
-  const rec = allRecords.find(r=>r.date===d);
+  const rec = allRecords.find(r=>String(r.date).slice(0,10)===d);
   if (!rec) { updateSummary(); return; }
   if (rec.weight) document.getElementById('weightInput').value = rec.weight;
   EX.forEach(ex => { if (rec.exercises?.[ex.id]) setEx(ex, rec.exercises[ex.id]); });
@@ -901,6 +905,8 @@ function showTab(id, btn) {
 // ═══════════════════════════════════════════════
 function renderHistory() {
   const el = document.getElementById('historyList');
+  // normalize dates
+  allRecords = allRecords.map(r=>({...r, date:String(r.date).slice(0,10)}));
   const recs = [...allRecords].reverse();
   if (!recs.length) { el.innerHTML='<div class="empty"><div class="icon">📭</div>아직 기록이 없습니다</div>'; return; }
 
@@ -936,7 +942,7 @@ function renderStats() {
 
   // calorie bar
   const cals = dates.map(d=>{
-    const rec=allRecords.find(r=>r.date===d);
+    const rec=allRecords.find(r=>String(r.date).slice(0,10)===d);
     if(!rec||!rec.exercises) return 0;
     return Object.keys(rec.exercises).reduce((s,id)=>{ const ex=EX.find(e=>e.id===id); return s+(ex?calcCal(ex,rec.exercises[id]):0); },0);
   });
@@ -953,7 +959,7 @@ function renderStats() {
   // exercise table
   const rows=EX.map(ex=>{
     let vol=0,cal=0,days=0;
-    dates.forEach(d=>{ const rec=allRecords.find(r=>r.date===d); if(!rec?.exercises?.[ex.id])return; days++; vol+=getVol(ex,rec.exercises[ex.id]); cal+=calcCal(ex,rec.exercises[ex.id]); });
+    dates.forEach(d=>{ const rec=allRecords.find(r=>String(r.date).slice(0,10)===d); if(!rec?.exercises?.[ex.id])return; days++; vol+=getVol(ex,rec.exercises[ex.id]); cal+=calcCal(ex,rec.exercises[ex.id]); });
     return days?{ex,vol,cal,days}:null;
   }).filter(Boolean);
 
@@ -967,7 +973,7 @@ function renderStats() {
     : '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px">기간 내 데이터 없음</td></tr>';
 
   // weight SVG
-  const wPairs=dates.map(d=>({d,w:allRecords.find(r=>r.date===d)?.weight})).filter(x=>x.w!=null);
+  const wPairs=dates.map(d=>({d,w:allRecords.find(r=>String(r.date).slice(0,10)===d)?.weight})).filter(x=>x.w!=null);
   renderWeightSvg(wPairs);
 }
 
@@ -1009,7 +1015,7 @@ function renderStrength() {
   if(allRecords.length<3){el.innerHTML='<div class="empty"><div class="icon">📊</div>3일 이상 데이터가 필요합니다</div>';return;}
 
   const rows=EX.map(ex=>{
-    const hist=allRecords.filter(r=>r.exercises?.[ex.id]).map(r=>({d:r.date,vol:getVol(ex,r.exercises[ex.id])}));
+    const hist=allRecords.filter(r=>r.exercises?.[ex.id]).map(r=>({d:String(r.date).slice(0,10),vol:getVol(ex,r.exercises[ex.id])}));
     if(!hist.length) return null;
     const recent=hist.slice(-7);
     const avgVol=recent.reduce((s,x)=>s+x.vol,0)/recent.length;
