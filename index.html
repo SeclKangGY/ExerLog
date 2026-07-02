@@ -789,7 +789,11 @@ function buildExGrid() {
 // ═══════════════════════════════════════════════
 //  DATE & RECORD LOAD
 // ═══════════════════════════════════════════════
-function todayStr() { return new Date().toISOString().slice(0,10); }
+function todayStr() {
+  const d = new Date();
+  d.setHours(d.getHours() + 9); // UTC+9 한국시간
+  return d.toISOString().slice(0,10);
+}
 function fmtD(s) { return s ? s.slice(5).replace('-','.') : ''; }
 function daysAgo(n) { const d=new Date(); d.setDate(d.getDate()-n+1); return d.toISOString().slice(0,10); }
 function datesBetween(a,b) {
