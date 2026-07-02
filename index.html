@@ -553,6 +553,9 @@ const EX = [
   { id:'dumbbell', name:'아령',          icon:'🏋️', color:'#fb923c',
     fields:['kg','arm','reps'], unit:'kg · 한팔/양팔 · 회',
     calFn:(v)=>(+v.kg||0)*(+v.reps||0)*(v.arm==='both'?2:1)*0.04, strGain:0.030 },
+  { id:'run',      name:'달리기',        icon:'🏃', color:'#f43f5e',
+    fields:['min','km'], unit:'min · km',
+    calFn:(v)=>(+v.km||0)*80+(+v.min||0)*0.1, strGain:0.020 },
 ];
 
 function calcCal(ex, vals) {
@@ -774,6 +777,11 @@ function buildExGrid() {
              </select>
              <label style="margin-top:5px">횟수 (회)</label>
              <input type="number" id="i_dumbbell_reps" placeholder="예: 15" min="0" oninput="updateSummary()">`;
+    } else if (ex.id==='run') {
+      inp = `<label>시간 (분)</label>
+             <input type="number" id="i_run_min" placeholder="예: 30" min="0" oninput="updateSummary()">
+             <label style="margin-top:5px">거리 (km)</label>
+             <input type="number" id="i_run_km" placeholder="예: 3.0" min="0" step="0.1" oninput="updateSummary()">`;
     } else {
       inp = `<label>${ex.id==='stairs'?'층수':'횟수'}</label>
              <input type="number" id="i_${ex.id}_${ex.field}" placeholder="${ex.id==='stairs'?'예: 20':'예: 30'}" min="0" oninput="updateSummary()">`;
@@ -839,6 +847,11 @@ function getEx(ex) {
     const arm=document.getElementById('i_dumbbell_arm')?.value||'both';
     return (kg||reps)?{kg,reps,arm}:null;
   }
+  if (ex.id==='run') {
+    const min=document.getElementById('i_run_min')?.value;
+    const km=document.getElementById('i_run_km')?.value;
+    return (min||km)?{min,km}:null;
+  }
   const v=document.getElementById(`i_${ex.id}_${ex.field}`)?.value;
   return v?{[ex.field]:v}:null;
 }
@@ -851,6 +864,7 @@ function setEx(ex, vals) {
     const sel=document.getElementById('i_dumbbell_arm');
     if(sel&&vals.arm) sel.value=vals.arm;
   }
+  else if(ex.id==='run'){s('i_run_min',vals.min);s('i_run_km',vals.km);}
   else s(`i_${ex.id}_${ex.field}`,vals[ex.field]);
 }
 
