@@ -406,10 +406,9 @@ input[type=date]:focus, .sel:focus { border-color: var(--accent); }
     <div class="ex-grid" id="exGrid"></div>
   </div>
 
-  <div class="summary-bar">
-    <div class="sum-item"><div class="sum-val" id="sumCal">0</div><div class="sum-lbl">소모 칼로리 (kcal)</div></div>
-    <div class="sum-item"><div class="sum-val" id="sumCount">0</div><div class="sum-lbl">운동 종목</div></div>
-    <div class="sum-item"><div class="sum-val" id="sumVol">0</div><div class="sum-lbl">총 운동량</div></div>
+  <div class="summary-bar" style="grid-template-columns:1fr 1fr">
+    <div class="sum-item"><div class="sum-val" id="sumCal" style="font-size:32px">0</div><div class="sum-lbl">소모 칼로리 (kcal)</div></div>
+    <div class="sum-item"><div class="sum-val" id="sumCount" style="font-size:32px">0</div><div class="sum-lbl">운동 종목 수</div></div>
   </div>
 
   <button class="btn-save" id="btnSave" onclick="saveRecord()">💾 저장하기</button>
@@ -615,6 +614,12 @@ window.onload = function() {
     const badge = document.getElementById("apiSetBadge"); if(badge) badge.style.display = "inline";
   }
 
+  // auto-fill saved credentials
+  const savedUser = localStorage.getItem('exerlog_user');
+  const savedPw   = localStorage.getItem('exerlog_pw');
+  if (savedUser) document.getElementById('loginUser').value = savedUser;
+  if (savedPw)   document.getElementById('loginPw').value   = savedPw;
+
   // auto-login from session storage
   const s = sessionStorage.getItem('exerlog_session');
   if (s) {
@@ -636,6 +641,9 @@ async function doLogin() {
     if (!r.ok) { document.getElementById('loginErr').textContent = r.msg; return; }
     session = { username: r.username, displayName: r.displayName };
     sessionStorage.setItem('exerlog_session', JSON.stringify(session));
+    // 아이디/비번 저장 (다음 접속시 자동채우기)
+    localStorage.setItem('exerlog_user', username);
+    localStorage.setItem('exerlog_pw', password);
     afterLogin();
   } catch(e) {
     document.getElementById('loginErr').textContent = e.message;
@@ -664,6 +672,8 @@ async function doRegister() {
 function doLogout() {
   session = null; allRecords = [];
   sessionStorage.removeItem('exerlog_session');
+  localStorage.removeItem('exerlog_user');
+  localStorage.removeItem('exerlog_pw');
   document.getElementById('loginUser').value='';
   document.getElementById('loginPw').value='';
   document.getElementById('loginErr').textContent='';
@@ -849,7 +859,6 @@ function updateSummary() {
   EX.forEach(ex=>{ const v=getEx(ex); if(v){cal+=calcCal(ex,v);cnt++;vol+=getVol(ex,v);} });
   document.getElementById('sumCal').textContent = Math.round(cal);
   document.getElementById('sumCount').textContent = cnt;
-  document.getElementById('sumVol').textContent = vol;
 }
 
 // ═══════════════════════════════════════════════
