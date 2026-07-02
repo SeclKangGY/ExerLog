@@ -380,6 +380,9 @@ input[type=date]:focus, .sel:focus { border-color: var(--accent); }
   <button onclick="showTab('settings',this)">⚙️ 설정</button>
 </nav>
 
+<!-- 디버그 박스 -->
+<div id="debugBox" style="display:none;position:fixed;top:70px;left:10px;right:10px;background:#1a2a1a;border:2px solid #38d9a9;border-radius:10px;padding:14px;font-size:13px;color:#38d9a9;z-index:999;line-height:1.8">디버그 로딩중...</div>
+
 <main>
 
 <!-- ── 기록 탭 ── -->
@@ -719,13 +722,18 @@ async function afterLogin() {
     const r = await api({ action:'getRecords', username:session.username });
       if (r.ok) {
       allRecords = r.records || [];
-      // 디버그: 화면에 표시
-      const dbg = `📦 records: ${allRecords.length}건\n` +
-        (allRecords[0] ? `첫기록: ${allRecords[0].date} / ${JSON.stringify(allRecords[0].exercises)}` : '없음');
-      showToast(dbg);
+    }
+    // 디버그 박스 표시
+    const dbgBox = document.getElementById('debugBox');
+    if (dbgBox) {
+      const rec0 = allRecords[0];
+      dbgBox.innerHTML = `records: ${allRecords.length}건<br>` +
+        (rec0 ? `첫기록날짜: [${rec0.date}]<br>오늘: [${todayStr()}]<br>일치: ${rec0.date===todayStr()}` : '데이터없음');
+      dbgBox.style.display = 'block';
     }
   } catch(e) {
-    showToast('기록 불러오기 실패: '+e.message, true);
+    const dbgBox = document.getElementById('debugBox');
+    if (dbgBox) { dbgBox.innerHTML = '오류: '+e.message; dbgBox.style.display='block'; }
   }
 
   setToday();
