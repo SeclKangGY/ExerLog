@@ -723,17 +723,13 @@ async function afterLogin() {
       if (r.ok) {
       allRecords = r.records || [];
     }
-    // 디버그 박스 표시
-    const dbgBox = document.getElementById('debugBox');
-    if (dbgBox) {
-      const rec0 = allRecords[0];
-      dbgBox.innerHTML = `records: ${allRecords.length}건<br>` +
-        (rec0 ? `첫기록날짜: [${rec0.date}]<br>오늘: [${todayStr()}]<br>일치: ${rec0.date===todayStr()}` : '데이터없음');
-      dbgBox.style.display = 'block';
-    }
+    // 디버그
+    const rec0 = allRecords[0];
+    const dbgMsg = `records:${allRecords.length}건 / ` +
+      (rec0 ? `날짜:[${rec0.date}] 오늘:[${todayStr()}] 일치:${rec0.date===todayStr()}` : '데이터없음');
+    showToast(dbgMsg);
   } catch(e) {
-    const dbgBox = document.getElementById('debugBox');
-    if (dbgBox) { dbgBox.innerHTML = '오류: '+e.message; dbgBox.style.display='block'; }
+    showToast('API오류:'+e.message, true);
   }
 
   setToday();
@@ -1099,7 +1095,7 @@ function showToast(msg, isErr=false) {
   t.textContent=msg; t.className='toast'+(isErr?' err':'');
   t.classList.add('show');
   clearTimeout(toastT);
-  toastT=setTimeout(()=>t.classList.remove('show'),2800);
+  toastT=setTimeout(()=>t.classList.remove('show'),10000);
 }
 </script>
 </body>
