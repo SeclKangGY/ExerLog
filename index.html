@@ -441,7 +441,15 @@ input[type=date]:focus, .sel:focus { border-color: var(--accent); }
 
   <div class="card">
     <div class="card-title">일별 소모 칼로리</div>
-    <div style="overflow-x:auto"><div class="bar-chart" id="calChart" style="height:220px;padding-bottom:20px"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:11px;color:var(--text2)">최고</span>
+        <span id="yMax" style="font-size:12px;color:var(--accent);font-weight:600">-</span>
+      </div>
+      <div style="overflow-x:auto"><div class="bar-chart" id="calChart" style="height:200px;padding-bottom:20px"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px">
+        <span style="font-size:11px;color:var(--text2)">최저</span>
+        <span id="yMin" style="font-size:12px;color:var(--text2)">-</span>
+      </div>
   </div>
 
   <div class="card">
@@ -976,6 +984,11 @@ function renderStats() {
     return Object.keys(rec.exercises).reduce((s,id)=>{ const ex=EX.find(e=>e.id===id); return s+(ex?calcCal(ex,rec.exercises[id]):0); },0);
   });
   const maxC=Math.max(...cals,1);
+  const minCnonzero = Math.min(...cals.filter(c=>c>0), maxC);
+  const yMaxEl = document.getElementById('yMax');
+  const yMinEl = document.getElementById('yMin');
+  if(yMaxEl) yMaxEl.textContent = Math.round(maxC).toLocaleString()+'kcal';
+  if(yMinEl) yMinEl.textContent = cals.filter(c=>c>0).length>1 ? Math.round(minCnonzero).toLocaleString()+'kcal' : '';
   const step=Math.ceil(dates.length/28);
   const shown=dates.filter((_,i)=>i%step===0);
   const shownC=cals.filter((_,i)=>i%step===0);
