@@ -212,9 +212,9 @@ input[type=date]:focus, .sel:focus { border-color: var(--accent); }
 .pb:hover { border-color: var(--accent); color: var(--text); }
 .pb.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-.bar-chart { display: flex; align-items: flex-end; gap: 5px; height: 140px; padding-top: 6px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 5px; height: 200px; padding-top: 6px; }
 .bar-col { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; min-width: 24px; }
-.bar { width: 100%; border-radius: 5px 5px 0 0; min-height: 3px; position: relative; cursor: default; transition: opacity .2s; }
+.bar { width: 100%; border-radius: 5px 5px 0 0; min-height: 4px; position: relative; cursor: default; transition: height .4s; }
 .bar:hover { opacity: .8; }
 .bar:hover::after {
   content: attr(data-tip);
@@ -441,7 +441,7 @@ input[type=date]:focus, .sel:focus { border-color: var(--accent); }
 
   <div class="card">
     <div class="card-title">일별 소모 칼로리</div>
-    <div style="overflow-x:auto"><div class="bar-chart" id="calChart" style="height:180px"></div></div>
+    <div style="overflow-x:auto"><div class="bar-chart" id="calChart" style="height:220px;padding-bottom:20px"></div></div>
   </div>
 
   <div class="card">
@@ -536,10 +536,12 @@ let API_URL = localStorage.getItem('exerlog_api') || '';
 //  EXERCISES
 // ═══════════════════════════════════════════════
 const EX = [
-  { id:'situp',   name:'윗몸일으키기', icon:'🔄', color:'#4f8eff',
-    field:'reps', unit:'회', calPerUnit:0.25, strGain:0.030 },
-  { id:'pushup',  name:'팔굽혀펴기',   icon:'💪', color:'#ff6b6b',
-    field:'reps', unit:'회', calPerUnit:0.32, strGain:0.035 },
+  { id:'walk',    name:'걷기',          icon:'🚶', color:'#ff9f43',
+    fields:['min','km'], unit:'min · km',
+    calFn:(v)=>(+v.km||0)*60+(+v.min||0)*0.08, strGain:0.015 },
+  { id:'run',      name:'달리기',        icon:'🏃', color:'#f43f5e',
+    fields:['min','km'], unit:'min · km',
+    calFn:(v)=>(+v.km||0)*80+(+v.min||0)*0.1, strGain:0.020 },
   { id:'stairs',  name:'계단오르기',   icon:'🪜', color:'#ffd43b',
     field:'floors',unit:'층',calPerUnit:0.15, strGain:0.020 },
   { id:'squat',   name:'스쿼트',       icon:'🦵', color:'#38d9a9',
@@ -547,15 +549,13 @@ const EX = [
   { id:'gripper', name:'악력기',        icon:'✊', color:'#c084fc',
     fields:['kg','reps'], unit:'kg × 회',
     calFn:(v)=>(+v.kg||0)*(+v.reps||0)*0.015, strGain:0.025 },
-  { id:'walk',    name:'걷기',          icon:'🚶', color:'#ff9f43',
-    fields:['min','km'], unit:'min · km',
-    calFn:(v)=>(+v.km||0)*60+(+v.min||0)*0.08, strGain:0.015 },
   { id:'dumbbell', name:'아령',          icon:'🏋️', color:'#fb923c',
     fields:['kg','arm','reps'], unit:'kg · 한팔/양팔 · 회',
     calFn:(v)=>(+v.kg||0)*(+v.reps||0)*(v.arm==='both'?2:1)*0.04, strGain:0.030 },
-  { id:'run',      name:'달리기',        icon:'🏃', color:'#f43f5e',
-    fields:['min','km'], unit:'min · km',
-    calFn:(v)=>(+v.km||0)*80+(+v.min||0)*0.1, strGain:0.020 },
+  { id:'pushup',  name:'팔굽혀펴기',   icon:'💪', color:'#ff6b6b',
+    field:'reps', unit:'회', calPerUnit:0.32, strGain:0.035 },
+  { id:'situp',   name:'윗몸일으키기', icon:'🔄', color:'#4f8eff',
+    field:'reps', unit:'회', calPerUnit:0.25, strGain:0.030 },
 ];
 
 function calcCal(ex, vals) {
