@@ -979,11 +979,15 @@ function renderStats() {
   const step=Math.ceil(dates.length/28);
   const shown=dates.filter((_,i)=>i%step===0);
   const shownC=cals.filter((_,i)=>i%step===0);
-  document.getElementById('calChart').innerHTML = shownC.map((c,i)=>
-    `<div class="bar-col">
-      <div class="bar" style="height:${c>0?Math.max((c/maxC*100),8):0}%;background:${c>0?'linear-gradient(to top,#4f8eff,#7fb3ff)':'#2d3748'}" data-tip="${Math.round(c)}kcal"></div>
+  const chartH = 160; // px
+  document.getElementById('calChart').innerHTML = shownC.map((c,i)=>{
+    const px = c>0 ? Math.max(Math.round(c/maxC*chartH), 8) : 2;
+    const bg = c>0 ? 'linear-gradient(to top,#4f8eff,#7fb3ff)' : '#2d3748';
+    return `<div class="bar-col">
+      <div class="bar" style="height:${px}px;background:${bg}" data-tip="${Math.round(c)}kcal"></div>
       <div class="bar-lbl">${shown[i].slice(5)}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   // exercise table
   const rows=EX.map(ex=>{
