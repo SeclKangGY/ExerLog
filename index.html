@@ -441,7 +441,7 @@ input[type=date]:focus, .sel:focus { border-color: var(--accent); }
 
   <div class="card">
     <div class="card-title">일별 소모 칼로리</div>
-    <div style="overflow-x:auto"><div class="bar-chart" id="calChart"></div></div>
+    <div style="overflow-x:auto"><div class="bar-chart" id="calChart" style="height:180px"></div></div>
   </div>
 
   <div class="card">
@@ -806,10 +806,19 @@ function todayStr() {
   return d.toISOString().slice(0,10);
 }
 function fmtD(s) { return s ? s.slice(5).replace('-','.') : ''; }
-function daysAgo(n) { const d=new Date(); d.setDate(d.getDate()-n+1); return d.toISOString().slice(0,10); }
+function daysAgo(n) {
+  const d=new Date();
+  d.setHours(d.getHours()+9); // KST
+  d.setDate(d.getDate()-n+1);
+  return d.toISOString().slice(0,10);
+}
 function datesBetween(a,b) {
-  const arr=[], cur=new Date(a), end=new Date(b);
-  while(cur<=end){ arr.push(cur.toISOString().slice(0,10)); cur.setDate(cur.getDate()+1); }
+  const arr=[], end=new Date(b+'T00:00:00');
+  let cur=new Date(a+'T00:00:00');
+  while(cur<=end){
+    arr.push(cur.toISOString().slice(0,10));
+    cur.setDate(cur.getDate()+1);
+  }
   return arr;
 }
 
@@ -972,7 +981,7 @@ function renderStats() {
   const shownC=cals.filter((_,i)=>i%step===0);
   document.getElementById('calChart').innerHTML = shownC.map((c,i)=>
     `<div class="bar-col">
-      <div class="bar" style="height:${(c/maxC*100).toFixed(1)}%;background:linear-gradient(to top,#4f8eff,#7fb3ff)" data-tip="${Math.round(c)}kcal"></div>
+      <div class="bar" style="height:${c>0?Math.max((c/maxC*100),8):0}%;background:${c>0?'linear-gradient(to top,#4f8eff,#7fb3ff)':'#2d3748'}" data-tip="${Math.round(c)}kcal"></div>
       <div class="bar-lbl">${shown[i].slice(5)}</div>
     </div>`).join('');
 
