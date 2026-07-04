@@ -573,16 +573,23 @@ function calcCal(ex, vals) {
 }
 function getVol(ex, vals) {
   if (!vals) return 0;
-  if (ex.id==='walk')    return +vals.km||0;
-  if (ex.id==='gripper') return +vals.reps||0;
-  if (ex.id==='stairs')  return +vals.floors||0;
+  if (ex.id==='walk')     return +vals.km||0;
+  if (ex.id==='run')      return +vals.km||0;
+  if (ex.id==='gripper')  return +vals.reps||0;
+  if (ex.id==='stairs')   return +vals.floors||0;
+  if (ex.id==='dumbbell') return +vals.reps||0;
   return +vals[ex.field]||0;
 }
 function fmtVol(ex, vals) {
   if (!vals) return '-';
-  if (ex.id==='gripper') return `${vals.kg||0}kg×${vals.reps||0}회`;
-  if (ex.id==='walk')    return `${vals.min||0}분/${vals.km||0}km`;
-  if (ex.id==='stairs')  return `${vals.floors||0}층`;
+  if (ex.id==='gripper')  return `${vals.kg||0}kg×${vals.reps||0}회`;
+  if (ex.id==='walk')     return `${vals.min||0}분/${vals.km||0}km`;
+  if (ex.id==='run')      return `${vals.min||0}분/${vals.km||0}km`;
+  if (ex.id==='stairs')   return `${vals.floors||0}층`;
+  if (ex.id==='dumbbell') {
+    const arm = vals.arm==='one'?'한팔':'양팔';
+    return `${vals.kg||0}kg ${arm} ${vals.reps||0}회`;
+  }
   return `${vals[ex.field]||0}${ex.unit}`;
 }
 
