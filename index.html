@@ -813,7 +813,14 @@ function todayStr() {
   d.setHours(d.getHours() + 9); // UTC+9 한국시간
   return d.toISOString().slice(0,10);
 }
-function fmtD(s) { return s ? s.slice(5).replace('-','.') : ''; }
+function fmtD(s) {
+  if (!s) return '';
+  // ensure YYYY-MM-DD format
+  const str = String(s).slice(0,10);
+  const parts = str.split('-');
+  if (parts.length === 3) return parts[1]+'.'+parts[2];
+  return str;
+}
 function daysAgo(n) {
   const d=new Date();
   d.setHours(d.getHours()+9); // KST
