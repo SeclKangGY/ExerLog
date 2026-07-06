@@ -833,9 +833,12 @@ function buildExGrid() {
 //  DATE & RECORD LOAD
 // ═══════════════════════════════════════════════
 function todayStr() {
-  const d = new Date();
-  d.setHours(d.getHours() + 9); // UTC+9 한국시간
-  return d.toISOString().slice(0,10);
+  return new Date().toLocaleDateString('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).replace(/\. /g, '-').replace('.', '').trim();
 }
 function fmtD(s) {
   if (!s) return '';
@@ -846,10 +849,14 @@ function fmtD(s) {
   return str;
 }
 function daysAgo(n) {
-  const d=new Date();
-  d.setHours(d.getHours()+9); // KST
-  d.setDate(d.getDate()-n+1);
-  return d.toISOString().slice(0,10);
+  const d = new Date();
+  d.setDate(d.getDate() - n + 1);
+  return d.toLocaleDateString('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).replace(/\. /g, '-').replace('.', '').trim();
 }
 function datesBetween(a,b) {
   const arr=[], end=new Date(b+'T00:00:00');
@@ -1183,5 +1190,3 @@ function showToast(msg, isErr=false) {
 </script>
 </body>
 </html>
-
-
