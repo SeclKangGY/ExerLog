@@ -1018,6 +1018,7 @@ function renderStats() {
     if(!rec||!rec.exercises) return 0;
     return Object.keys(rec.exercises).reduce((s,id)=>{ const ex=EX.find(e=>e.id===id); return s+(ex?calcCal(ex,rec.exercises[id]):0); },0);
   });
+  showToast(`오늘:${todayStr()} / 기간끝:${to} / 마지막날짜:${dates[dates.length-1]}`);
   const maxC=Math.max(...cals,1);
   const minCnonzero = Math.min(...cals.filter(c=>c>0), maxC);
   const yMaxEl = document.getElementById('yMax');
