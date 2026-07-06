@@ -856,10 +856,14 @@ function daysAgo(n) {
   return y+'-'+m+'-'+d;
 }
 function datesBetween(a,b) {
-  const arr=[], end=new Date(b+'T00:00:00');
+  const arr=[];
   let cur=new Date(a+'T00:00:00');
+  const end=new Date(b+'T00:00:00');
   while(cur<=end){
-    arr.push(cur.toISOString().slice(0,10));
+    const y=cur.getFullYear();
+    const m=String(cur.getMonth()+1).padStart(2,'0');
+    const d=String(cur.getDate()).padStart(2,'0');
+    arr.push(y+'-'+m+'-'+d);
     cur.setDate(cur.getDate()+1);
   }
   return arr;
@@ -1018,7 +1022,6 @@ function renderStats() {
     if(!rec||!rec.exercises) return 0;
     return Object.keys(rec.exercises).reduce((s,id)=>{ const ex=EX.find(e=>e.id===id); return s+(ex?calcCal(ex,rec.exercises[id]):0); },0);
   });
-  showToast(`오늘:${todayStr()} / 기간끝:${to} / 마지막날짜:${dates[dates.length-1]}`);
   const maxC=Math.max(...cals,1);
   const minCnonzero = Math.min(...cals.filter(c=>c>0), maxC);
   const yMaxEl = document.getElementById('yMax');
