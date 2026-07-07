@@ -656,7 +656,7 @@ window.onload = function() {
   if (savedPw)   document.getElementById('loginPw').value   = savedPw;
 
   // auto-login from session storage
-  const s = sessionStorage.getItem('exerlog_session');
+  const s = localStorage.getItem('exerlog_session');
   if (s) {
     session = JSON.parse(s);
     afterLogin();
@@ -675,7 +675,7 @@ async function doLogin() {
     const r = await api({ action:'login', username, password });
     if (!r.ok) { document.getElementById('loginErr').textContent = r.msg; return; }
     session = { username: r.username, displayName: r.displayName };
-    sessionStorage.setItem('exerlog_session', JSON.stringify(session));
+    localStorage.setItem('exerlog_session', JSON.stringify(session));
     // 아이디/비번 저장 (다음 접속시 자동채우기)
     localStorage.setItem('exerlog_user', username);
     localStorage.setItem('exerlog_pw', password);
@@ -706,7 +706,7 @@ async function doRegister() {
 
 function doLogout() {
   session = null; allRecords = [];
-  sessionStorage.removeItem('exerlog_session');
+  localStorage.removeItem('exerlog_session');
   localStorage.removeItem('exerlog_user');
   localStorage.removeItem('exerlog_pw');
   document.getElementById('loginUser').value='';
