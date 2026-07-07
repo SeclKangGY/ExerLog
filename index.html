@@ -561,32 +561,48 @@ let API_URL = localStorage.getItem('exerlog_api') || 'https://script.google.com/
 //  EXERCISES
 // ═══════════════════════════════════════════════
 const EX = [
-  { id:'walk',    name:'걷기',          icon:'🚶', color:'#ff9f43',
+  { id:'walk',     name:'걷기',          icon:'🚶', color:'#ff9f43',
     fields:['min','km'], unit:'min · km',
-    calFn:(v)=>(+v.km||0)*60+(+v.min||0)*0.08, strGain:0.015 },
+    calFn:(v,w)=>(3.5*w*(+v.min||0))/200, strGain:0.015 },
   { id:'run',      name:'달리기',        icon:'🏃', color:'#f43f5e',
     fields:['min','km'], unit:'min · km',
-    calFn:(v)=>(+v.km||0)*80+(+v.min||0)*0.1, strGain:0.020 },
-  { id:'stairs',  name:'계단오르기',   icon:'🪜', color:'#ffd43b',
-    field:'floors',unit:'층',calPerUnit:0.15, strGain:0.020 },
-  { id:'squat',   name:'스쿼트',       icon:'🦵', color:'#38d9a9',
-    field:'reps', unit:'회', calPerUnit:0.35, strGain:0.030 },
-  { id:'gripper', name:'악력기',        icon:'✊', color:'#c084fc',
+    calFn:(v,w)=>(8.0*w*(+v.min||0))/200, strGain:0.020 },
+  { id:'stairs',   name:'계단오르기',   icon:'🪜', color:'#ffd43b',
+    field:'floors', unit:'층',
+    calFn:(v,w)=>(+v.floors||0)*w*0.0025, strGain:0.020 },
+  { id:'squat',    name:'스쿼트',        icon:'🦵', color:'#38d9a9',
+    field:'reps',  unit:'회',
+    calFn:(v,w)=>(+v.reps||0)*w*0.005, strGain:0.030 },
+  { id:'gripper',  name:'악력기',        icon:'✊', color:'#c084fc',
     fields:['kg','reps'], unit:'kg × 회',
-    calFn:(v)=>(+v.kg||0)*(+v.reps||0)*0.015, strGain:0.025 },
+    calFn:(v,w)=>(+v.kg||0)*(+v.reps||0)*0.015, strGain:0.025 },
   { id:'dumbbell', name:'아령',          icon:'🏋️', color:'#fb923c',
     fields:['kg','arm','reps'], unit:'kg · 한팔/양팔 · 회',
-    calFn:(v)=>(+v.kg||0)*(+v.reps||0)*(v.arm==='both'?2:1)*0.04, strGain:0.030 },
-  { id:'pushup',  name:'팔굽혀펴기',   icon:'💪', color:'#ff6b6b',
-    field:'reps', unit:'회', calPerUnit:0.32, strGain:0.035 },
-  { id:'situp',   name:'윗몸일으키기', icon:'🔄', color:'#4f8eff',
-    field:'reps', unit:'회', calPerUnit:0.25, strGain:0.030 },
+    calFn:(v,w)=>(+v.kg||0)*(+v.reps||0)*(v.arm==='both'?2:1)*0.04, strGain:0.030 },
+  { id:'pushup',   name:'팔굽혀펴기',   icon:'💪', color:'#ff6b6b',
+    field:'reps',  unit:'회',
+    calFn:(v,w)=>(+v.reps||0)*w*0.0045, strGain:0.035 },
+  { id:'situp',    name:'윗몸일으키기', icon:'🔄', color:'#4f8eff',
+    field:'reps',  unit:'회',
+    calFn:(v,w)=>(+v.reps||0)*w*0.0035, strGain:0.030 },
 ];
 
-function calcCal(ex, vals) {
+// 최근 몸무게 가져오기 (없으면 70kg)
+function getLatestWeight(dateStr) {
+  if (!allRecords || allRecords.length === 0) return 70;
+  // 해당 날짜 포함 이전 기록에서 몸무게 찾기
+  const target = dateStr || todayStr();
+  const withWeight = allRecords.filter(r => r.weight && r.date <= target);
+  if (withWeight.length === 0) return 70;
+  // 가장 최근 몸무게
+  return +withWeight[withWeight.length-1].weight || 70;
+}
+
+function calcCal(ex, vals, dateStr) {
   if (!vals) return 0;
-  if (ex.calFn) return ex.calFn(vals);
-  return (+vals[ex.field]||0) * ex.calPerUnit;
+  const w = getLatestWeight(dateStr);
+  if (ex.calFn) return ex.calFn(vals, w);
+  return (+vals[ex.field]||0) * (ex.calPerUnit || 0);
 }
 function getVol(ex, vals) {
   if (!vals) return 0;
@@ -926,7 +942,7 @@ function setEx(ex, vals) {
 
 function updateSummary() {
   let cal=0, cnt=0, vol=0;
-  EX.forEach(ex=>{ const v=getEx(ex); if(v){cal+=calcCal(ex,v);cnt++;vol+=getVol(ex,v);} });
+  EX.forEach(ex=>{ const v=getEx(ex); if(v){cal+=calcCal(ex,v,document.getElementById('recordDate').value);cnt++;vol+=getVol(ex,v);} });
   document.getElementById('sumCal').textContent = Math.round(cal);
   document.getElementById('sumCount').textContent = cnt;
 }
@@ -988,7 +1004,7 @@ function renderHistory() {
 
   el.innerHTML = recs.map(rec=>{
     const exIds = Object.keys(rec.exercises||{});
-    const cal = exIds.reduce((s,id)=>{ const ex=EX.find(e=>e.id===id); return s+(ex?calcCal(ex,rec.exercises[id]):0); }, 0);
+    const cal = exIds.reduce((s,id)=>{ const ex=EX.find(e=>e.id===id); return s+(ex?calcCal(ex,rec.exercises[id],rec.date):0); }, 0);
     const tags = exIds.map(id=>{ const ex=EX.find(e=>e.id===id); return ex?`<span class="tag">${ex.icon}${ex.name}</span>`:''; }).join('');
     const wTag = rec.weight?`<span class="tag">⚖️${rec.weight}kg</span>`:'';
     return `<div class="h-item">
@@ -1020,7 +1036,7 @@ function renderStats() {
   const cals = dates.map(d=>{
     const rec=allRecords.find(r=>String(r.date).slice(0,10)===d);
     if(!rec||!rec.exercises) return 0;
-    return Object.keys(rec.exercises).reduce((s,id)=>{ const ex=EX.find(e=>e.id===id); return s+(ex?calcCal(ex,rec.exercises[id]):0); },0);
+    return Object.keys(rec.exercises).reduce((s,id)=>{ const ex=EX.find(e=>e.id===id); return s+(ex?calcCal(ex,rec.exercises[id],d):0); },0);
   });
   const maxC=Math.max(...cals,1);
   const minCnonzero = Math.min(...cals.filter(c=>c>0), maxC);
@@ -1044,7 +1060,7 @@ function renderStats() {
   // exercise table
   const rows=EX.map(ex=>{
     let vol=0,cal=0,days=0;
-    dates.forEach(d=>{ const rec=allRecords.find(r=>String(r.date).slice(0,10)===d); if(!rec?.exercises?.[ex.id])return; days++; vol+=getVol(ex,rec.exercises[ex.id]); cal+=calcCal(ex,rec.exercises[ex.id]); });
+    dates.forEach(d=>{ const rec=allRecords.find(r=>String(r.date).slice(0,10)===d); if(!rec?.exercises?.[ex.id])return; days++; vol+=getVol(ex,rec.exercises[ex.id]); cal+=calcCal(ex,rec.exercises[ex.id],d); });
     return days?{ex,vol,cal,days}:null;
   }).filter(Boolean);
 
