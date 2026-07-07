@@ -563,10 +563,10 @@ let API_URL = localStorage.getItem('exerlog_api') || 'https://script.google.com/
 const EX = [
   { id:'walk',     name:'걷기',          icon:'🚶', color:'#ff9f43',
     fields:['min','km'], unit:'min · km',
-    calFn:(v,w)=>(3.5*w*(+v.min||0))/200, strGain:0.015 },
+    calFn:(v,w)=>(3.5*w*(+v.min||0))/60, strGain:0.015 },
   { id:'run',      name:'달리기',        icon:'🏃', color:'#f43f5e',
     fields:['min','km'], unit:'min · km',
-    calFn:(v,w)=>(8.0*w*(+v.min||0))/200, strGain:0.020 },
+    calFn:(v,w)=>(8.0*w*(+v.min||0))/60, strGain:0.020 },
   { id:'stairs',   name:'계단오르기',   icon:'🪜', color:'#ffd43b',
     field:'floors', unit:'층',
     calFn:(v,w)=>(+v.floors||0)*w*0.0025, strGain:0.020 },
